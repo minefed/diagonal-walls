@@ -8,6 +8,15 @@ pluginManagement {
     }
 }
 
-include("Common", "Fabric", "NeoForge", "Forge")
+def minefedLoaders = providers.gradleProperty("minefedLoaders")
+        .getOrElse("Fabric,NeoForge,Forge").split(",").collect { it.trim() }
+def unsupportedLoaders = minefedLoaders.findAll { !(it in ["Fabric", "NeoForge", "Forge"]) }
+if (unsupportedLoaders) {
+    throw new GradleException("Unsupported minefedLoaders: " + unsupportedLoaders.join(", "))
+}
+
+// Architectury inspects mappings from every included Loom project.
+include("Common")
+minefedLoaders.each { include(it) }
 
 apply from: "https://raw.githubusercontent.com/Fuzss/modresources/e6311c7c40cfb0fe4240f22fd80efbbe9c554585/gradle/v2/settings.gradle"
